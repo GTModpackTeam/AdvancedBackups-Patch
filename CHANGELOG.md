@@ -1,3 +1,8 @@
+# 1.0.2
+- Also supports CRL versions.
+
+* * *
+
 # 1.0.1
 - Refix login error.
 

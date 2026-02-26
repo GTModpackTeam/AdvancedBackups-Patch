@@ -36,6 +36,8 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
     if (propertyBool('generate_sources_jar')) {
         withSourcesJar()
     }
@@ -170,6 +172,25 @@ if (!propertyBool('enable_shadow')) {
     shadowJar.enabled = false
 }
 
+// Shared manifest attributes (excluding ModType)
+ext.buildManifestAttributes = {
+    def attribute_map = [:]
+    if (configurations.contain.size() > 0) {
+        attribute_map['ContainedDeps'] = configurations.contain.collect { it.name }.join(' ')
+        attribute_map['NonModDeps'] = true
+    }
+    if (propertyBool('is_coremod')) {
+        attribute_map['FMLCorePlugin'] = propertyString('coremod_plugin_class_name')
+        if (propertyBool('coremod_includes_mod')) {
+            attribute_map['FMLCorePluginContainsFMLMod'] = true
+        }
+    }
+    if (propertyBool('use_access_transformer')) {
+        attribute_map['FMLAT'] = propertyString('access_transformer_locations')
+    }
+    return attribute_map
+}
+
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     if (configurations.contain.size() > 0) {
@@ -179,22 +200,7 @@ jar {
     }
     doFirst {
         manifest {
-            def attribute_map = [:]
-            attribute_map['ModType'] = "CRL"
-            if (configurations.contain.size() > 0) {
-                attribute_map['ContainedDeps'] = configurations.contain.collect { it.name }.join(' ')
-                attribute_map['NonModDeps'] = true
-            }
-            if (propertyBool('is_coremod')) {
-                attribute_map['FMLCorePlugin'] = propertyString('coremod_plugin_class_name')
-                if (propertyBool('coremod_includes_mod')) {
-                    attribute_map['FMLCorePluginContainsFMLMod'] = true
-                }
-            }
-            if (propertyBool('use_access_transformer')) {
-                attribute_map['FMLAT'] = propertyString('access_transformer_locations')
-            }
-            attributes(attribute_map)
+            attributes(buildManifestAttributes())
         }
     }
     if (propertyBool('enable_shadow')) {
@@ -202,6 +208,25 @@ jar {
     } else {
         finalizedBy(tasks.named("remapJar"))
     }
+}
+
+// Cleanroom variant with ModType: CRL
+tasks.register('cleanroomJar', Jar) {
+    dependsOn 'remapJar'
+    from(zipTree(tasks.jar.archiveFile)) {
+        exclude 'META-INF/MANIFEST.MF'
+    }
+    archiveClassifier = 'cleanroom'
+    manifest {
+        def attrs = buildManifestAttributes()
+        attrs['ModType'] = 'CRL'
+        attrs['Fabric-Loom-Mixin-Remap-Type'] = 'static'
+        attributes(attrs)
+    }
+}
+
+tasks.named('build') {
+    dependsOn 'cleanroomJar'
 }
 
 
