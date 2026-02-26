@@ -1,5 +1,9 @@
 package com.github.gtexpert.advancedbackupspatch.mixin;
 
+import java.util.function.Consumer;
+
+import computer.heather.advancedbackups.AdvancedBackups;
+import computer.heather.advancedbackups.core.ABCore;
 import computer.heather.advancedbackups.network.NetworkHandler;
 
 import net.minecraftforge.common.MinecraftForge;
@@ -7,15 +11,23 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.EventBus;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import computer.heather.advancedbackups.AdvancedBackups;
-
 @Mixin(value = AdvancedBackups.class, remap = false)
 public abstract class AdvancedBackupsMixin {
+
+    @Shadow
+    public static Consumer<String> infoLogger;
+
+    @Shadow
+    public static Consumer<String> warningLogger;
+
+    @Shadow
+    public static Consumer<String> errorLogger;
 
     /**
      * Disable EVENT_BUS.register(this) in the constructor.
@@ -47,5 +59,17 @@ public abstract class AdvancedBackupsMixin {
     private void onPreInit(FMLPreInitializationEvent event, CallbackInfo ci) {
         MinecraftForge.EVENT_BUS.register(this);
         NetworkHandler.registerMessages();
+    }
+
+    /**
+     * Set ABCore loggers after preInit sets them on AdvancedBackups.
+     * Without this, ABCore.infoLogger is null on the client side (only set in onServerStarting),
+     * causing NPE in ClientConfigManager when receiving PacketToastTest.
+     */
+    @Inject(method = "preInit", at = @At("TAIL"))
+    private void onPreInitTail(FMLPreInitializationEvent event, CallbackInfo ci) {
+        ABCore.infoLogger = infoLogger;
+        ABCore.warningLogger = warningLogger;
+        ABCore.errorLogger = errorLogger;
     }
 }
