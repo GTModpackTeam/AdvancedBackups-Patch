@@ -25,8 +25,8 @@ env:
   NAME: "AdvancedBackups-Patch"
 
   # Curseforge and Modrinth project IDs
-  CURSEFORGE_PROJECT_ID: "851103"
-  MODRINTH_PROJECT_ID: "ipueNiWG"
+  CURSEFORGE_PROJECT_ID: "1472996"
+  MODRINTH_PROJECT_ID: "1btdrsb8"
 
 concurrency:
   group: publish-${{ inputs.target_branch || github.ref }}
@@ -79,16 +79,16 @@ jobs:
           github-draft: false
           github-prerelease: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
-#          modrinth-id: ${{ env.MODRINTH_PROJECT_ID }}
-#          modrinth-token: "${{ secrets.MODRINTH_API_KEY }}"
-#          modrinth-dependencies: |
-#            G1ckZuWK(required)
-#            Jrmoreqs(required)
-#          curseforge-id: ${{ env.CURSEFORGE_PROJECT_ID }}
-#          curseforge-token: "${{ secrets.CURSEFORGE_API_KEY }}"
-#          curseforge-dependencies: |
-#            mixin-booter(required)
-#            advanced-backups(required)
+          modrinth-id: ${{ env.MODRINTH_PROJECT_ID }}
+          modrinth-token: "${{ secrets.MODRINTH_API_KEY }}"
+          modrinth-dependencies: |
+            G1ckZuWK(required)
+            Jrmoreqs(required)
+          curseforge-id: ${{ env.CURSEFORGE_PROJECT_ID }}
+          curseforge-token: "${{ secrets.CURSEFORGE_API_KEY }}"
+          curseforge-dependencies: |
+            mixin-booter(required)
+            advanced-backups(required)
           files: |
             build/libs/!(*-@(cleanroom|sources|javadoc|)).jar
             build/libs/*-@(cleanroom).jar
