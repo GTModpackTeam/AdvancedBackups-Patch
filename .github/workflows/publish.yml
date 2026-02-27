@@ -2,12 +2,34 @@
 name: Publish Project
 
 on:
-  push:
-    tags:
-      - "*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Mod version'
+        required: true
+      release_type:
+        description: 'Release type'
+        type: choice
+        default: 'beta'
+        options:
+          - 'release'
+          - 'beta'
+          - 'alpha'
+
+env:
+  # link to the changelog with a format code for the version
+  CHANGELOG_LOCATION: "Changelog is available [here](https://github.com/${{ github.repository }}/releases/tag/AdvancedBackups-Patch-v${{ github.event.inputs.version }}-${{ github.event.inputs.release_type }})"
+  # Version of the mod
+  FULL_VERSION: "${{ github.event.inputs.version }}-${{ github.event.inputs.release_type }}"
+  # type of release
+  NAME: "AdvancedBackups-Patch"
+
+  # Curseforge and Modrinth project IDs
+  CURSEFORGE_PROJECT_ID: "851103"
+  MODRINTH_PROJECT_ID: "ipueNiWG"
 
 concurrency:
-  group: publish-${{ github.ref }}
+  group: publish-${{ inputs.target_branch || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -22,62 +44,59 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v6
         with:
-          ref: main
-          fetch-depth: 0
+          ref: ${{ inputs.target_branch || github.ref }}
           fetch-tags: true
 
-      - name: Extract version from tag
-        id: version
-        run: echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+      - name: Check if tag already exists
+        run: |
+          if git rev-parse --verify --quiet "v${{ github.event.inputs.version }}"; then
+            echo "Version ${{ github.event.inputs.version }} already exists, aborting workflow."
+            exit 1
+          fi
 
-      - name: Update mod_version in gradle.properties
-        run: sed -i "s/mod_version.*=.*/mod_version = ${{ steps.version.outputs.version }}/g" gradle.properties
+      - name: Set version
+        run: sed -i "s/mod_version.*=.*/mod_version = ${{ env.FULL_VERSION }}/g" gradle.properties
 
       - name: Commit and push gradle.properties
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: "Bump version to v${{ steps.version.outputs.version }}"
+          commit_message: "Bump version to v${{ env.FULL_VERSION }}"
+          commit_options: '--no-verify'
           file_pattern: gradle.properties
+          tagging_message: "v${{ env.FULL_VERSION }}"
 
-      - name: Setup Build
-        uses: ./.github/actions/build_setup
-
-      - name: Build Project
-        run: ./gradlew --info build
-
-      - name: Create GitHub Release
-        uses: ncipollo/release-action@v1.20.0
-        with:
-          artifacts: "build/libs/*"
-          generateReleaseNotes: true
-
-      - name: Publish to CurseForge and Modrinth
+      - name: Publish to Curseforge and Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
         with:
-          # Only include this section if you wish to publish
-          # your assets on Modrinth.
-          modrinth-id: placeholder
-          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-          modrinth-dependencies: |
-            G1ckZuWK(required)
-            Jrmoreqs(required)
-
-          # Only include this section if you wish to publish
-          # your assets on CurseForge.
-          curseforge-id: placeholder
-          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-          curseforge-dependencies: |
-            mixin-booter(required)
-            advanced-backups(required)
-
+          github-tag: "v${{ env.FULL_VERSION }}"
+          github-generate-changelog: true
+          github-draft: false
+          github-prerelease: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+#          modrinth-id: ${{ env.MODRINTH_PROJECT_ID }}
+#          modrinth-token: "${{ secrets.MODRINTH_API_KEY }}"
+#          modrinth-dependencies: |
+#            G1ckZuWK(required)
+#            Jrmoreqs(required)
+#          curseforge-id: ${{ env.CURSEFORGE_PROJECT_ID }}
+#          curseforge-token: "${{ secrets.CURSEFORGE_API_KEY }}"
+#          curseforge-dependencies: |
+#            mixin-booter(required)
+#            advanced-backups(required)
           files: |
-            build/libs/!(*-@(dev|sources|javadoc)).jar
-            build/libs/*-@(dev|sources|javadoc).jar
-          loaders: forge
-          game-versions: 1.12.2
+            build/libs/!(*-@(cleanroom|sources|javadoc|)).jar
+            build/libs/*-@(cleanroom).jar
+            build/libs/*-@(sources).jar
+          name: "${{ env.NAME }}-${{ env.FULL_VERSION }}.jar"
+          changelog: "Changelog is available [here](https://github.com/${{github.repository}}/blob/main/CHANGELOG.md)"
+          version: "${{ github.event.inputs.version }}"
+          version-type: "${{ github.event.inputs.release_type }}"
+          loaders: |
+            forge
+          game-versions: |
+            1.12.2
           java: |
+            8
             21
             22
-          version: ${{ steps.version.outputs.version }}
-          changelog: ${{ steps.changes.outputs.changes }}
           retry-attempts: 2
