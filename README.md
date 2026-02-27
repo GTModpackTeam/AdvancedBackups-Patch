@@ -1,88 +1,27 @@
-# CleanroomModTemplate
-Mod development template for Cleanroom, uses Unimined
+<h1 align="center">Advanced Backups Patch</h1>
+<h1 align="center">
+    <a href="https://www.curseforge.com/minecraft/mc-mods/advanced-backups"><img src="https://img.shields.io/badge/Available%20for-MC%201.12.2%20-informational?style=for-the-badge" alt="Supported Versions"></a>
+    <a href="https://github.com/GTModpackTeam/AdvancedBackups-Patch/blob/main/LICENSE"><img src="https://img.shields.io/github/license/GTModpackTeam/AdvancedBackups-Patch?style=for-the-badge" alt="License"></a>
+    <a href="https://discord.gg/xBwHpZyZdW"><img src="https://img.shields.io/discord/945647524855812176?color=5464ec&label=Discord&style=for-the-badge" alt="Discord"></a>
+    <br>
+    <a href="https://www.curseforge.com/minecraft/mc-mods/advanced-backups-patch"><img src="https://cf.way2muchnoise.eu/ZZZZZZ.svg?badge_style=for_the_badge" alt="CurseForge"></a>
+    <a href="https://modrinth.com/mod/advanced-backups-patch"><img src="https://img.shields.io/modrinth/dt/ZZZZZ?logo=modrinth&label=&suffix=%20&style=for-the-badge&color=2d2d2d&labelColor=5ca424&logoColor=1c1c1c" alt="Modrinth"></a>
+    <a href="https://github.com/GTModpackTeam/AdvancedBackups-Patch/releases"><img src="https://img.shields.io/github/downloads/GTModpackTeam/AdvancedBackups-Patch/total?sort=semver&logo=github&label=&style=for-the-badge&color=2d2d2d&labelColor=545454&logoColor=FFFFFF" alt="GitHub"></a>
+</h1>
 
-## Usage
-### Choose Branch
-Choose mixin branch if you want to use Mixin.
+## Features
+- This mod is a compatibility patch that fixes the [Advanced Backups](https://www.curseforge.com/minecraft/mc-mods/advanced-backups) mod for Minecraft 1.12.2.
 
-Use scala and kotlin branch if you want to write in non-Java language. 
+## Required mod
+- [MixinBooter](https://github.com/CleanroomMC/MixinBooter)
 
-There are 4 branches available:
-- main
-- mixin
-- scala
-- kotlin
+## License
+- Advanced Backups Patch
+    - Copyright (c) 2026 tier940
+    - [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/GTModpackTeam/AdvancedBackups-Patch/blob/main/LICENSE)
+- [CleanroomModTemplate](https://github.com/CleanroomMC/CleanroomModTemplate)
+    - Copyright (c) 2025 kappa-maintainer
+    - [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/CleanroomMC/CleanroomModTemplate/blob/main/LICENSE)
 
-If you want to use non-main branches, after clicked *Create a new repository* under *Use this template*, check the *Include all branches* checkbox.
-
-### gradle.properties
-Edit gradle.properties and set your modid, mod version, mod name, package, etc.
-
-If you are writing a coremod, remember to set related settings to true.
-
-### Reference Class
-Mostly used to store mod version so you can fill it to `@Mod`.
-
-You should change its location to fit your new package name.
-
-You can find it under `src/main/java-templates`.
-
-### Dependencies
-You can find dependency script in `gradle/scripts/dependencies.gradle`.
-
-No more `rfg.deobf()` or `fg.deobf` for mods, you should use `modImplementation`, `modCompileOnly` and `modRuntimeOnly`.
-
-### Shadow
-You can use `shadow` in dependency declaration to shadow libraries.
-
-### Contain
-You can use `contain` in dependency declaration to add non-mod libraries to artifact jar.
-
-They will be extracted and loaded automatically in production.
-
-### Mixin
-MixinBooter API is deprecated in Cleanroom.
-
-Current approach is to set json configs in `MixinConfigs` manifest key, which will be read by Cleanroom.
-
-You don't need to set tons of json too. If you aren't mixining into Forge, all you need is two jsons for `DEFAULT` hase and `MOD` Phase.
-
-All you need is to put `IEarlyMixinLoader` mixin to `DEFAULT` json, and, mixins from `ILateMixinLoader` to `MOD` json.
-
-As for calling `Loader.isModLoaded()`, just fit an `IMixinConfigPlugin` to your json and call in `shouldApply()`
-
-There are some example mixins and a HEI dependency in mixin fork, remove them before writing yours.
-
-### Access Transformer
-You MUST write AT file in MCP name. It will be remapped back to SRG name in artifact jar.
-
-Rename AT file name to your modid before using it. There's an example entry in AT file, remove it if you want to use AT. 
-
-**WARNING**: ATs from dependency won't be applied to vanilla source. 
-
-### Source Code with Comments
-Run `genSources` task in gradle.
-
-If you want to `find usage` from vanilla like RFG, just change the scope in IntelliJ settings.
-
-### Running Client or Server
-You **MUST** add mods by using `modImplementation` or `modRuntimeOnly`, or mapping and ATs will break.
-
-If you are using IntelliJ, **DO NOT** use the `Minecraft Client` configure with a blue icon. Just use the `runClient` Gradle task.
-
-### GitHub Action
-This template comes with three workflows.
-
-`build.yml` will build and upload artifact for every commit. Useful when you want to provide test builds for debugging.
-
-`release.yml` will make a GitHub release if you pushed a git tag.
-
-`release-to-cf-mr.yml` can publish your mod to CurseForge and/or Modrinth.
-
-You need to fill in your project IDs and configure your tokens in GitHub repository first.
-
-By default, you will need to manually trigger the workflow in web page, but you can also enable tag triggering by merging it into `release.yml`.
-
-### Credit
-Thanks @Karnatour for fixing shadow plugin
-Thanks @ghostflyby for making kotlin branch
+## Credits
+- Thanks to HeatherWhite for [Advanced Backups](https://www.curseforge.com/minecraft/mc-mods/advanced-backups)
