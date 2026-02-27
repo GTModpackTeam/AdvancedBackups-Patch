@@ -1,0 +1,77 @@
+# Publishes the project to GitHub Releases, CurseForge, and Modrinth
+name: Publish Project
+
+on:
+  push:
+    tags:
+      - "*"
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Update mod_version in gradle.properties
+        run: sed -i "s/mod_version.*=.*/mod_version = ${{ steps.version.outputs.version }}/g" gradle.properties
+
+      - name: Commit and push gradle.properties
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "Bump version to v${{ steps.version.outputs.version }}"
+          file_pattern: gradle.properties
+
+      - name: Setup Build
+        uses: ./.github/actions/build_setup
+
+      - name: Build Project
+        run: ./gradlew --info build
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1.20.0
+        with:
+          artifacts: "build/libs/*"
+          generateReleaseNotes: true
+
+#      - name: Publish to CurseForge and Modrinth
+#        uses: Kir-Antipov/mc-publish@v3.3
+#        with:
+#          # Only include this section if you wish to publish
+#          # your assets on Modrinth.
+#          modrinth-id: placeholder
+#          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+#
+#          # Only include this section if you wish to publish
+#          # your assets on CurseForge.
+#          curseforge-id: placeholder
+#          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+#
+#          files: |
+#            build/libs/!(*-@(dev|sources|javadoc)).jar
+#            build/libs/*-@(dev|sources|javadoc).jar
+#          loaders: forge
+#          game-versions: 1.12.2
+#          java: |
+#            21
+#            22
+#          version: ${{ steps.version.outputs.version }}
+#          changelog: ${{ steps.changes.outputs.changes }}
+#          retry-attempts: 2

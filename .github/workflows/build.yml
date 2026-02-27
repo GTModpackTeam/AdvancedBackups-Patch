@@ -1,33 +1,38 @@
-name: Build mod jar
+# Build the mod
+name: Build
 
 on:
-  [workflow_dispatch, push]
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
 
-permissions:
-  contents: read
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-
+    name: Build
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+
     steps:
-    - uses: actions/checkout@v6
-    - name: Set up JDK
-      uses: actions/setup-java@v5
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-    - uses: gradle/actions/setup-gradle@v5
-      with:
-        gradle-version: 9.3.1
-      name: Set up Gradle
-    - name: Add permission
-      run: chmod +x ./gradlew
-    - name: Execute Gradle build
-      run: ./gradlew build
-        
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v5
-      with:
-        path: build/libs
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Setup Build
+        uses: ./.github/actions/build_setup
+
+      - name: Build Project
+        run: ./gradlew --info --stacktrace build
+
+      - name: Upload Jars
+        uses: actions/upload-artifact@v5
+        with:
+          name: AdvancedBackups-Patch
+          path: build/libs/*.jar
+          retention-days: 31
