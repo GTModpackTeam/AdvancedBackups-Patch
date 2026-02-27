@@ -1,3 +1,8 @@
+# 1.0.3
+- Fix dependencies.
+
+* * *
+
 # 1.0.2
 - Also supports CRL versions.
 

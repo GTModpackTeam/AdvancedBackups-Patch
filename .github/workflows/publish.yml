@@ -51,27 +51,33 @@ jobs:
           artifacts: "build/libs/*"
           generateReleaseNotes: true
 
-#      - name: Publish to CurseForge and Modrinth
-#        uses: Kir-Antipov/mc-publish@v3.3
-#        with:
-#          # Only include this section if you wish to publish
-#          # your assets on Modrinth.
-#          modrinth-id: placeholder
-#          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-#
-#          # Only include this section if you wish to publish
-#          # your assets on CurseForge.
-#          curseforge-id: placeholder
-#          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-#
-#          files: |
-#            build/libs/!(*-@(dev|sources|javadoc)).jar
-#            build/libs/*-@(dev|sources|javadoc).jar
-#          loaders: forge
-#          game-versions: 1.12.2
-#          java: |
-#            21
-#            22
-#          version: ${{ steps.version.outputs.version }}
-#          changelog: ${{ steps.changes.outputs.changes }}
-#          retry-attempts: 2
+      - name: Publish to CurseForge and Modrinth
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          # Only include this section if you wish to publish
+          # your assets on Modrinth.
+          modrinth-id: placeholder
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-dependencies: |
+            G1ckZuWK(required)
+            Jrmoreqs(required)
+
+          # Only include this section if you wish to publish
+          # your assets on CurseForge.
+          curseforge-id: placeholder
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          curseforge-dependencies: |
+            mixin-booter(required)
+            advanced-backups(required)
+
+          files: |
+            build/libs/!(*-@(dev|sources|javadoc)).jar
+            build/libs/*-@(dev|sources|javadoc).jar
+          loaders: forge
+          game-versions: 1.12.2
+          java: |
+            21
+            22
+          version: ${{ steps.version.outputs.version }}
+          changelog: ${{ steps.changes.outputs.changes }}
+          retry-attempts: 2
