@@ -65,6 +65,12 @@ jobs:
           file_pattern: gradle.properties
           tagging_message: "v${{ env.FULL_VERSION }}"
 
+      - name: Setup Build
+        uses: ./.github/actions/build_setup
+
+      - name: Build Project
+        run: ./gradlew --info build
+
       - name: Publish to Curseforge and Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
         with:
