@@ -1,3 +1,8 @@
+# 1.0.4
+- Fix mod info.
+
+* * *
+
 # 1.0.3
 - Fix dependencies.
 

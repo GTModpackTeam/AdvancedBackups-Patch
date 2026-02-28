@@ -11,7 +11,6 @@ import zone.rong.mixinbooter.ILateMixinLoader;
         name = Reference.MOD_NAME,
         acceptedMinecraftVersions = "[1.12.2]",
         version = Reference.VERSION,
-//        updateJSON = "https://forge.curseupdate.com/851103/gtexpert",
         dependencies = "required-after:mixinbooter" + "@[10.6,);" +
                 "after:advancedbackups;")
 public class AdvancedBackupsPatch implements ILateMixinLoader {
