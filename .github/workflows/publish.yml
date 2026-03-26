@@ -49,8 +49,8 @@ jobs:
 
       - name: Check if tag already exists
         run: |
-          if git rev-parse --verify --quiet "v${{ github.event.inputs.version }}"; then
-            echo "Version ${{ github.event.inputs.version }} already exists, aborting workflow."
+          if git rev-parse --verify --quiet "v${{ env.FULL_VERSION }}"; then
+            echo "Version ${{ env.FULL_VERSION }} already exists, aborting workflow."
             exit 1
           fi
 

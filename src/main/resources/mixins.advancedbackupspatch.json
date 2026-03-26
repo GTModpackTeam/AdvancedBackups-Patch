@@ -3,6 +3,9 @@
   "package": "com.github.gtexpert.advancedbackupspatch.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "AdvancedBackupsMixin"
+    "AdvancedBackupsMixin",
+    "BackupWrapperMixin",
+    "ClientConfigManagerMixin",
+    "ThreadedBackupMixin"
   ]
 }
