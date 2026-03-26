@@ -25,6 +25,8 @@ public abstract class ClientConfigManagerMixin {
      * which may not see logger writes from the IntegratedServer thread
      * due to the Java Memory Model (non-volatile fields).
      * This provides a fallback to prevent NPE.
+     *
+     * @see <a href="https://github.com/HeatherComputer/AdvancedBackups/issues/87">Issue #87</a>
      */
     @Inject(method = "loadOrCreateConfig", at = @At("HEAD"))
     private static void ensureLoggers(CallbackInfo ci) {
