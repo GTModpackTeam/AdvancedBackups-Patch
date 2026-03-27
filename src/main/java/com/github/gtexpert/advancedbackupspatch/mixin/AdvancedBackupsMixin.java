@@ -32,6 +32,8 @@ public abstract class AdvancedBackupsMixin {
     /**
      * Disable EVENT_BUS.register(this) in the constructor.
      * The mod container is not yet established at construction time, so defer to preInit.
+     *
+     * @see <a href="https://github.com/HeatherComputer/AdvancedBackups/issues/87">Issue #87</a>
      */
     @Redirect(method = "<init>",
             at = @At(value = "INVOKE",
@@ -43,6 +45,8 @@ public abstract class AdvancedBackupsMixin {
     /**
      * Disable NetworkHandler.registerMessages() in the constructor.
      * Defer network channel registration until the mod container is established.
+     *
+     * @see <a href="https://github.com/HeatherComputer/AdvancedBackups/issues/87">Issue #87</a>
      */
     @Redirect(method = "<init>",
             at = @At(value = "INVOKE",
@@ -54,6 +58,8 @@ public abstract class AdvancedBackupsMixin {
     /**
      * Register the event bus and network messages at the beginning of preInit,
      * where the mod container is properly established.
+     *
+     * @see <a href="https://github.com/HeatherComputer/AdvancedBackups/issues/87">Issue #87</a>
      */
     @Inject(method = "preInit", at = @At("HEAD"))
     private void onPreInit(FMLPreInitializationEvent event, CallbackInfo ci) {
@@ -65,6 +71,8 @@ public abstract class AdvancedBackupsMixin {
      * Set ABCore loggers after preInit sets them on AdvancedBackups.
      * Without this, ABCore.infoLogger is null on the client side (only set in onServerStarting),
      * causing NPE in ClientConfigManager when receiving PacketToastTest.
+     *
+     * @see <a href="https://github.com/HeatherComputer/AdvancedBackups/issues/87">Issue #87</a>
      */
     @Inject(method = "preInit", at = @At("TAIL"))
     private void onPreInitTail(FMLPreInitializationEvent event, CallbackInfo ci) {

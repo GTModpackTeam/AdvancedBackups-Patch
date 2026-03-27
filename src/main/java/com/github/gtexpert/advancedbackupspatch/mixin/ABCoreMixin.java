@@ -1,8 +1,6 @@
 package com.github.gtexpert.advancedbackupspatch.mixin;
 
-import java.io.File;
-
-import computer.heather.advancedbackups.core.backups.BackupWrapper;
+import computer.heather.advancedbackups.core.ABCore;
 import computer.heather.advancedbackups.core.backups.gson.BackupManifest;
 
 import com.google.gson.Gson;
@@ -12,35 +10,22 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(value = BackupWrapper.class, remap = false)
-public abstract class BackupWrapperMixin {
+@Mixin(value = ABCore.class, remap = false)
+public abstract class ABCoreMixin {
 
     /**
-     * Prevent NPE when File.listFiles() returns null in deleteDirectoryContents.
-     * This happens when the path is not a directory or an I/O error occurs.
-     */
-    @Redirect(method = "deleteDirectoryContents",
-            at = @At(value = "INVOKE",
-                    target = "Ljava/io/File;listFiles()[Ljava/io/File;"))
-    private static File[] safeListFiles(File directory) {
-        File[] result = directory.listFiles();
-        return result != null ? result : new File[0];
-    }
-
-    /**
-     * Prevent NPE when parsing a corrupted backup manifest in checkStartupBackups.
+     * Prevent NPE when parsing a corrupted backup manifest in setActivity.
      * <p>
      * The JAR v3.7.1 only catches {@link JsonParseException}, but {@code gson.fromJson()}
-     * can return null (or a manifest with null fields) for certain malformed JSON,
+     * can return null or a manifest with null fields for certain malformed JSON,
      * causing a {@link NullPointerException} when accessing {@code manifest.general.activity}.
      * <p>
      * This redirect converts the null case into a {@link JsonParseException},
-     * which is already caught and handled by the existing recovery logic
-     * (creates default manifest and writes it back to disk).
+     * which is already caught and handled by the existing recovery logic.
      *
      * @see <a href="https://github.com/HeatherComputer/AdvancedBackups/issues/110">Issue #110</a>
      */
-    @Redirect(method = "checkStartupBackups",
+    @Redirect(method = "setActivity",
             at = @At(value = "INVOKE",
                     target = "Lcom/google/gson/Gson;fromJson(Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Object;"))
     private static Object safeFromJson(Gson gson, String json, Class<?> classOfT) {
